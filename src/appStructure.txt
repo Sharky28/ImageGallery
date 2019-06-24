@@ -14,4 +14,4 @@
 |   |--app.module.ts (firebase config.)
 |   |--app-routing.module.ts (route config.)
 |
-|--index.html (cdn path for bootstrap)
+|--index.html (cdn path for bootstrap).
