@@ -60,7 +60,7 @@ export class ImageComponent implements OnInit {
   }
 
   get formControls() {
-    return this.formTemplate['controls']
+    return this.formTemplate['controls'];
   }
 
   resetForm() {
