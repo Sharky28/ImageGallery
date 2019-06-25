@@ -1,5 +1,5 @@
 import { Component, OnInit } from '@angular/core';
-import { FormGroup, FormControl } from '@angular/forms';
+import { FormGroup, FormControl, Validators } from '@angular/forms';
 
 @Component({
   selector: 'app-image',
@@ -8,13 +8,14 @@ import { FormGroup, FormControl } from '@angular/forms';
 })
 export class ImageComponent implements OnInit {
 
-  imgSrc : string = '/assets/img/image_placeholder.jpg';
+  imgSrc: string = '/assets/img/image_placeholder.jpg';
   selectedImage: any = null;
+  isSubmited: boolean = false;
 
   formTemplate = new FormGroup({
-    caption : new FormControl(''),
-    category : new FormControl(''),
-    imageUrl : new FormControl('')
+    caption: new FormControl('',Validators.required),
+    category: new FormControl(''),
+    imageUrl: new FormControl('',Validators.required)
 
 
   })
@@ -24,17 +25,25 @@ export class ImageComponent implements OnInit {
   ngOnInit() {
   }
 
-  showPreview(event:any){
-    if(event.target.files && event.target.files[0]){
+  showPreview(event: any) {
+    if (event.target.files && event.target.files[0]) {
       const reader = new FileReader();
-      reader.onload = (e:any) => this.imgSrc = e.target.result;
+      reader.onload = (e: any) => this.imgSrc = e.target.result;
       reader.readAsDataURL(event.target.files[0]);
       this.selectedImage = event.target.files[0];
     }
-  else{
-    this.imgSrc='/assets/img/image_placeholder.jpg';
-    this.selectedImage = null;
-  }  
+    else {
+      this.imgSrc = '/assets/img/image_placeholder.jpg';
+      this.selectedImage = null;
+    }
+  }
+
+  onSubmit(formValue) {
+    this.isSubmited = true;
+  }
+
+  get formControls(){
+    return this.formTemplate['controls']
   }
 
 }
