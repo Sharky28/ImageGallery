@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { FormGroup, FormControl, Validators } from '@angular/forms';
+import { AngularFireStorage } from '@angular/fire/storage';
+import { finalize } from "rxjs/operators";
+import { ImageService } from 'src/app/shared/image.service';
 
 @Component({
   selector: 'app-image',
@@ -8,21 +11,22 @@ import { FormGroup, FormControl, Validators } from '@angular/forms';
 })
 export class ImageComponent implements OnInit {
 
-  imgSrc: string = '/assets/img/image_placeholder.jpg';
+  imgSrc: string;
   selectedImage: any = null;
-  isSubmited: boolean = false;
+  isSubmited: boolean;
 
   formTemplate = new FormGroup({
-    caption: new FormControl('',Validators.required),
+    caption: new FormControl('', Validators.required),
     category: new FormControl(''),
-    imageUrl: new FormControl('',Validators.required)
+    imageUrl: new FormControl('', Validators.required)
 
 
   })
 
-  constructor() { }
+  constructor(private storage: AngularFireStorage, private service: ImageService) { }
 
   ngOnInit() {
+    this.resetForm();
   }
 
   showPreview(event: any) {
@@ -40,10 +44,35 @@ export class ImageComponent implements OnInit {
 
   onSubmit(formValue) {
     this.isSubmited = true;
+    if (this.formTemplate.valid) {
+      var filePath = `${formValue.category}/${this.selectedImage.name}_${new Date().getTime()}`;
+      const fileRef = this.storage.ref(filePath);
+      this.storage.upload(filePath, this.selectedImage).snapshotChanges().pipe(
+        finalize(() => {
+          fileRef.getDownloadURL().subscribe((url) => {
+            formValue['imageUrl'] = url;
+            this.service.insertImageDetails(formValue);
+            this.resetForm();
+          })
+        })
+      ).subscribe();
+    }
   }
 
-  get formControls(){
+  get formControls() {
     return this.formTemplate['controls']
+  }
+
+  resetForm() {
+    this.formTemplate.reset();
+    this.formTemplate.setValue({
+      caption: '',
+      imageUrl: '',
+      category: 'Animal'
+    });
+    this.imgSrc = '/assets/img/image_placeholder.jpg';
+    this.selectedImage = null;
+    this.isSubmited = false;
   }
 
 }
